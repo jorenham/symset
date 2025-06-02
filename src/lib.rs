@@ -8,8 +8,7 @@ fn require_set<'py, T: PyClass, R>(
     other: Bound<'py, PyAny>,
     to_result: fn(PyRef<'py, T>, Bound<'py, PyAny>) -> PyResult<Bound<'py, R>>,
 ) -> PyResult<Bound<'py, R>> {
-    let py = other.py();
-    let abstract_set_type = PyModule::import(py, "typing")?.getattr("AbstractSet")?;
+    let abstract_set_type = PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?;
     if other.is_instance(&abstract_set_type)? {
         to_result(slf, other)
     } else {
@@ -139,8 +138,18 @@ mod _core {
             Self::__or__(slf, other)
         }
 
-        // TODO: implement the following `typing.AbstractSet` methods
-        // isdisjoint: (Iterable[Any]) -> bool
+        fn isdisjoint(&self, other: Bound<'_, PyAny>) -> PyResult<bool> {
+            match other.try_iter() {
+                Ok(_) => Ok(true),
+                Err(_) => {
+                    let error_msg = format!(
+                        "unsupported operand type: 'EmptySet' and '{}'",
+                        other.get_type().name()?
+                    );
+                    Err(PyTypeError::new_err(error_msg))
+                }
+            }
+        }
     }
 
     #[pymodule_export]

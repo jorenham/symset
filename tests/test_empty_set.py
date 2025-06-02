@@ -224,3 +224,19 @@ def test_rsub() -> None:
         _ = [] - EmptySet  # pyright: ignore[reportOperatorIssue]
     with pytest.raises(TypeError):
         _ = {} - EmptySet  # pyright: ignore[reportOperatorIssue]
+
+
+def test_isdisjoint() -> None:
+    assert EmptySet.isdisjoint(EmptySet)
+    assert EmptySet.isdisjoint(_EMPTY_FROZENSET)
+    assert EmptySet.isdisjoint(_EMPTY_BUILTIN_SET)
+
+    assert EmptySet.isdisjoint({object()})
+    assert EmptySet.isdisjoint(frozenset({object()}))
+
+    with pytest.raises(TypeError):
+        _ = EmptySet.isdisjoint(None)  # pyright: ignore[reportArgumentType]
+    with pytest.raises(TypeError):
+        _ = EmptySet.isdisjoint(object())  # pyright: ignore[reportArgumentType]
+    with pytest.raises(TypeError):
+        _ = EmptySet.isdisjoint(EmptySetType)  # pyright: ignore[reportArgumentType]
