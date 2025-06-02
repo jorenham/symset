@@ -19,7 +19,25 @@ env:
   RUSTFLAGS: "-Dwarnings"
 
 jobs:
+  lint_rust:
+    runs-on: ubuntu-latest
+    name: Lint (rust)
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: clippy
+        run: cargo clippy --all-targets --all-features
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
+
   lint_python:
+    name: Lint (python)
     runs-on: ubuntu-latest
     timeout-minutes: 1
 
@@ -40,30 +58,6 @@ jobs:
         with:
           args: "format --check --diff"
           version-file: "pyproject.toml"
-
-  lint_rust:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: clippy
-        run: cargo clippy --all-targets --all-features
-
-  format_rust:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
-      - uses: mbrobbel/rustfmt-check@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          mode: review
 
   typecheck:
     runs-on: ${{ matrix.os }}
