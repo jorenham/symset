@@ -1,23 +1,54 @@
 use pyo3::basic::CompareOp;
-use pyo3::prelude::*;
+use pyo3::exceptions::PyTypeError;
 use pyo3::types::PyFrozenSet;
+use pyo3::{PyClass, prelude::*};
+
+fn require_set<'py, T: PyClass, R>(
+    slf: PyRef<'py, T>,
+    other: Bound<'py, PyAny>,
+    to_result: fn(PyRef<'py, T>, Bound<'py, PyAny>) -> PyResult<Bound<'py, R>>,
+) -> PyResult<Bound<'py, R>> {
+    let abstract_set_type = PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?;
+    if other.is_instance(&abstract_set_type)? {
+        to_result(slf, other)
+    } else {
+        let error_msg = format!(
+            "unsupported operand type: 'Nothing' and '{}'",
+            other.get_type().name()?
+        );
+        Err(PyTypeError::new_err(error_msg))
+    }
+}
 
 #[pymodule]
 mod _core {
-
     use super::*;
 
     #[pyclass(frozen)]
-    struct EmptySetType;
+    struct NothingIterator;
 
     #[pymethods]
-    impl EmptySetType {
+    impl NothingIterator {
+        fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+            slf
+        }
+
+        fn __next__(&self) -> Option<PyObject> {
+            None
+        }
+    }
+
+    #[pyclass(frozen)]
+    pub struct NothingType;
+
+    #[pymethods]
+    impl NothingType {
         fn __str__(&self) -> String {
             "∅".to_string()
         }
 
         fn __repr__(&self) -> String {
-            "EmptySet".to_string()
+            "Nothing".to_string()
         }
 
         fn __bool__(&self) -> bool {
@@ -28,21 +59,32 @@ mod _core {
             0
         }
 
-        fn __contains__(&self, _item: &str) -> bool {
+        fn __contains__(&self, _item: PyObject) -> bool {
             false
         }
 
-        fn __hash__<'py>(slf: Bound<'py, Self>) -> isize {
-            PyFrozenSet::empty(slf.py()).unwrap().hash().unwrap()
+        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<NothingIterator>> {
+            Py::new(slf.py(), NothingIterator)
         }
 
-        // fn __hash__<'py>(slf: Bound<'py, Self>) -> PyResult<isize> {
-        //     let builtins = slf.py().import("builtins")?;
-        //     builtins.getattr("frozenset")?.call1(())?.hash()
-        // }
+        /// Match the hash algorithm used by the builtin- frozenset type, for n=0
+        /// https://github.com/python/cpython/blob/v3.13.3/Lib/_collections_abc.py#L669-L700
+        fn _hash(&self) -> isize {
+            static MASK: usize = usize::MAX;
+            static H1: usize = 1_927_868_237 & MASK;
+            static H2: usize = (H1 >> 11) ^ (H1 >> 25) ^ H1;
+            static H3: usize = (H2 * 69_069 + 907_133_923) & MASK;
+            static H4: isize = H3 as isize;
+            static H5: isize = if H4 == -1 { 590_923_713 } else { H4 };
+            H5
+        }
 
-        fn __richcmp__<'py>(&self, other: Bound<'py, PyAny>, op: CompareOp) -> PyResult<bool> {
-            let empty = PyFrozenSet::empty(other.py()).unwrap();
+        fn __hash__(&self) -> isize {
+            self._hash()
+        }
+
+        fn __richcmp__(&self, other: Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
+            let empty = PyFrozenSet::empty(other.py())?;
             match op {
                 CompareOp::Lt => empty.lt(other),
                 CompareOp::Le => empty.le(other),
@@ -52,8 +94,65 @@ mod _core {
                 CompareOp::Ge => empty.ge(other),
             }
         }
+
+        fn __and__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, Self>> {
+            require_set(slf, other, |slf_, other_| {
+                Ok(slf_.into_pyobject(other_.py())?)
+            })
+        }
+
+        fn __or__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            require_set(slf, other, |slf_, other_| {
+                Ok(if other_.is_truthy()? {
+                    other_
+                } else {
+                    slf_.into_pyobject(other_.py())?.into_any()
+                })
+            })
+        }
+
+        fn __xor__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            Self::__or__(slf, other)
+        }
+
+        fn __sub__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, Self>> {
+            Self::__and__(slf, other)
+        }
+
+        fn __rsub__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            Self::__or__(slf, other)
+        }
+
+        fn isdisjoint(&self, other: Bound<'_, PyAny>) -> PyResult<bool> {
+            match other.try_iter() {
+                Ok(_) => Ok(true),
+                Err(_) => {
+                    let error_msg = format!(
+                        "unsupported operand type: 'Nothing' and '{}'",
+                        other.get_type().name()?
+                    );
+                    Err(PyTypeError::new_err(error_msg))
+                }
+            }
+        }
     }
 
     #[pymodule_export]
-    const EMPTY_SET: EmptySetType = EmptySetType;
+    #[allow(non_upper_case_globals)]
+    const Nothing: NothingType = NothingType;
 }

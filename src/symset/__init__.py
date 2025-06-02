@@ -1,15 +1,15 @@
 """Symbolic sets."""
 
-from typing import Final
+from collections.abc import Set as AbstractSet
 
-from symset import _core
+from ._core import Nothing, NothingType
 
-__all__ = ("EmptySet", "EmptySetType")
+AbstractSet.register(NothingType)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+del AbstractSet
+
+
+__all__ = "Nothing", "NothingType"
 
 
 def __dir__() -> tuple[str, ...]:
     return __all__
-
-
-EmptySet: Final = _core.EMPTY_SET
-EmptySetType: Final = _core.EmptySetType
