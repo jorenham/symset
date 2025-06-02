@@ -1,5 +1,8 @@
 name: CI
-permissions: read-all
+
+permissions:
+  contents: read
+  pull-requests: write
 
 on:
   push:
@@ -40,8 +43,6 @@ jobs:
 
   lint_rust:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@
