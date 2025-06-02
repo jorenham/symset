@@ -1,8 +1,25 @@
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyTypeError;
-use pyo3::prelude::*;
 use pyo3::types::PyFrozenSet;
-use std::sync::OnceLock;
+use pyo3::{PyClass, prelude::*};
+
+fn require_set<'py, T: PyClass, R>(
+    slf: PyRef<'py, T>,
+    other: Bound<'py, PyAny>,
+    to_result: fn(PyRef<'py, T>, Bound<'py, PyAny>) -> PyResult<Bound<'py, R>>,
+) -> PyResult<Bound<'py, R>> {
+    let py = other.py();
+    let abstract_set_type = PyModule::import(py, "typing")?.getattr("AbstractSet")?;
+    if other.is_instance(&abstract_set_type)? {
+        to_result(slf, other)
+    } else {
+        let error_msg = format!(
+            "unsupported operand type: 'EmptySet' and '{}'",
+            other.get_type().name()?
+        );
+        Err(PyTypeError::new_err(error_msg))
+    }
+}
 
 #[pymodule]
 mod _core {
@@ -23,7 +40,7 @@ mod _core {
     }
 
     #[pyclass(frozen)]
-    struct EmptySetType;
+    pub struct EmptySetType;
 
     #[pymethods]
     impl EmptySetType {
@@ -51,13 +68,20 @@ mod _core {
             Py::new(slf.py(), EmptySetIterator)
         }
 
-        fn _hash(slf: PyRef<'_, Self>) -> PyResult<isize> {
-            PyFrozenSet::empty(slf.py())?.hash()
+        /// Match the hash algorithm used by the builtin- frozenset type, for n=0
+        /// https://github.com/python/cpython/blob/v3.13.3/Lib/_collections_abc.py#L669-L700
+        fn _hash(&self) -> isize {
+            static MASK: usize = usize::MAX;
+            static H1: usize = 1_927_868_237 & MASK;
+            static H2: usize = (H1 >> 11) ^ (H1 >> 25) ^ H1;
+            static H3: usize = (H2 * 69_069 + 907_133_923) & MASK;
+            static H4: isize = H3 as isize;
+            static H5: isize = if H4 == -1 { 590_923_713 } else { H4 };
+            H5
         }
 
-        fn __hash__(slf: PyRef<'_, Self>) -> isize {
-            static HASH_CELL: OnceLock<isize> = OnceLock::new();
-            *HASH_CELL.get_or_init(|| Self::_hash(slf).unwrap())
+        fn __hash__(&self) -> isize {
+            self._hash()
         }
 
         fn __richcmp__(&self, other: Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
@@ -76,30 +100,46 @@ mod _core {
             slf: PyRef<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, Self>> {
-            let py = other.py();
-            let abstract_set_type = PyModule::import(py, "typing")?.getattr("AbstractSet")?;
-            if other.is_instance(&abstract_set_type)? {
-                Ok(slf.into_pyobject(py).unwrap())
-            } else {
-                Err(PyTypeError::new_err(
-                    "Expected an instance of typing.AbstractSet",
-                ))
-            }
+            require_set(slf, other, |slf_, other_| {
+                Ok(slf_.into_pyobject(other_.py())?)
+            })
         }
 
-        fn __rand__<'py>(
+        fn __or__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            require_set(slf, other, |slf_, other_| {
+                Ok(if other_.is_truthy()? {
+                    other_
+                } else {
+                    slf_.into_pyobject(other_.py())?.into_any()
+                })
+            })
+        }
+
+        fn __xor__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            Self::__or__(slf, other)
+        }
+
+        fn __sub__<'py>(
             slf: PyRef<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, Self>> {
             Self::__and__(slf, other)
         }
 
+        fn __rsub__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, PyAny>> {
+            Self::__or__(slf, other)
+        }
+
         // TODO: implement the following `typing.AbstractSet` methods
-        // __[r]and__: (AbstractSet[?]) -> Self
-        // __[r]or__: (S @ AbstractSet[?]]) -> S
-        // __[r]xor__: (S @ AbstractSet[?]]) -> S
-        // __sub__: (AbstractSet[?]) -> Self
-        // __rsub__: (S @ AbstractSet[?]) -> S
         // isdisjoint: (Iterable[Any]) -> bool
     }
 

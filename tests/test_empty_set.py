@@ -150,8 +150,77 @@ def test_and() -> None:
     assert EmptySet & frozenset({object()}) is EmptySet
 
     with pytest.raises(TypeError):
-        _ = EmptySet > ()  # pyright: ignore[reportOperatorIssue]
+        _ = EmptySet & ()  # pyright: ignore[reportOperatorIssue]
     with pytest.raises(TypeError):
-        _ = EmptySet > []  # pyright: ignore[reportOperatorIssue]
+        _ = EmptySet & []  # pyright: ignore[reportOperatorIssue]
     with pytest.raises(TypeError):
-        _ = EmptySet > {}  # pyright: ignore[reportOperatorIssue]
+        _ = EmptySet & {}  # pyright: ignore[reportOperatorIssue]
+
+
+def test_or() -> None:
+    assert EmptySet | EmptySet is EmptySet
+    assert EmptySet | _EMPTY_FROZENSET is EmptySet
+    assert EmptySet | _EMPTY_BUILTIN_SET is EmptySet
+
+    s1 = {object()}
+    f1 = frozenset({object()})
+    assert EmptySet | s1 is s1
+    assert EmptySet | f1 is f1
+
+    with pytest.raises(TypeError):
+        _ = EmptySet | ()  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet | []  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet | {}  # pyright: ignore[reportOperatorIssue]
+
+
+def test_xor() -> None:
+    assert EmptySet ^ EmptySet is EmptySet
+    assert EmptySet ^ _EMPTY_FROZENSET is EmptySet
+    assert EmptySet ^ _EMPTY_BUILTIN_SET is EmptySet
+
+    s1 = {object()}
+    f1 = frozenset({object()})
+    assert EmptySet ^ s1 is s1
+    assert EmptySet ^ f1 is f1
+
+    with pytest.raises(TypeError):
+        _ = EmptySet ^ ()  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet ^ []  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet ^ {}  # pyright: ignore[reportOperatorIssue]
+
+
+def test_sub() -> None:
+    assert EmptySet - EmptySet is EmptySet
+    assert EmptySet - _EMPTY_FROZENSET is EmptySet
+    assert EmptySet - _EMPTY_BUILTIN_SET is EmptySet
+
+    assert EmptySet - {object()} is EmptySet
+    assert EmptySet - frozenset({object()}) is EmptySet
+
+    with pytest.raises(TypeError):
+        _ = EmptySet - ()  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet - []  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet - {}  # pyright: ignore[reportOperatorIssue]
+
+
+def test_rsub() -> None:
+    assert _EMPTY_FROZENSET - EmptySet is EmptySet
+    assert _EMPTY_BUILTIN_SET - EmptySet is EmptySet
+
+    s1 = {object()}
+    f1 = frozenset({object()})
+    assert s1 - EmptySet == s1
+    assert f1 - EmptySet == f1
+
+    with pytest.raises(TypeError):
+        _ = () - EmptySet  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = [] - EmptySet  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = {} - EmptySet  # pyright: ignore[reportOperatorIssue]
