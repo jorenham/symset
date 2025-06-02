@@ -1,10 +1,26 @@
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyFrozenSet;
+use std::sync::OnceLock;
 
 #[pymodule]
 mod _core {
+
     use super::*;
+
+    #[pyclass(frozen)]
+    struct EmptySetIterator;
+
+    #[pymethods]
+    impl EmptySetIterator {
+        fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+            slf
+        }
+
+        fn __next__(&self) -> Option<PyObject> {
+            None
+        }
+    }
 
     #[pyclass(frozen)]
     struct EmptySetType;
@@ -31,16 +47,21 @@ mod _core {
             false
         }
 
-        fn __hash__(slf: Bound<'_, Self>) -> isize {
-            PyFrozenSet::empty(slf.py()).unwrap().hash().unwrap()
+        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<EmptySetIterator>> {
+            Py::new(slf.py(), EmptySetIterator)
         }
 
-        fn __richcmp__<'py>(
-            slf: Bound<'py, Self>,
-            other: Bound<'py, PyAny>,
-            op: CompareOp,
-        ) -> PyResult<bool> {
-            let empty = PyFrozenSet::empty(slf.py()).unwrap();
+        fn _hash(slf: PyRef<'_, Self>) -> PyResult<isize> {
+            PyFrozenSet::empty(slf.py())?.hash()
+        }
+
+        fn __hash__(slf: PyRef<'_, Self>) -> isize {
+            static HASH_CELL: OnceLock<isize> = OnceLock::new();
+            *HASH_CELL.get_or_init(|| Self::_hash(slf).unwrap())
+        }
+
+        fn __richcmp__(&self, other: Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
+            let empty = PyFrozenSet::empty(other.py())?;
             match op {
                 CompareOp::Lt => empty.lt(other),
                 CompareOp::Le => empty.le(other),
@@ -50,6 +71,14 @@ mod _core {
                 CompareOp::Ge => empty.ge(other),
             }
         }
+
+        // TODO: implement the following `typing.AbstractSet` methods
+        // __[r]and__: (AbstractSet[?]) -> Self
+        // __[r]or__: (S @ AbstractSet[?]]) -> S
+        // __[r]xor__: (S @ AbstractSet[?]]) -> S
+        // __sub__: (AbstractSet[?]) -> Self
+        // __rsub__: (S @ AbstractSet[?]) -> S
+        // isdisjoint: (Iterable[Any]) -> bool
     }
 
     #[pymodule_export]
