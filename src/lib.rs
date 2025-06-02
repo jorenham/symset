@@ -13,7 +13,7 @@ fn require_set<'py, T: PyClass, R>(
         to_result(slf, other)
     } else {
         let error_msg = format!(
-            "unsupported operand type: 'EmptySet' and '{}'",
+            "unsupported operand type: 'Nothing' and '{}'",
             other.get_type().name()?
         );
         Err(PyTypeError::new_err(error_msg))
@@ -25,10 +25,10 @@ mod _core {
     use super::*;
 
     #[pyclass(frozen)]
-    struct EmptySetIterator;
+    struct NothingIterator;
 
     #[pymethods]
-    impl EmptySetIterator {
+    impl NothingIterator {
         fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
             slf
         }
@@ -39,16 +39,16 @@ mod _core {
     }
 
     #[pyclass(frozen)]
-    pub struct EmptySetType;
+    pub struct NothingType;
 
     #[pymethods]
-    impl EmptySetType {
+    impl NothingType {
         fn __str__(&self) -> String {
             "∅".to_string()
         }
 
         fn __repr__(&self) -> String {
-            "EmptySet".to_string()
+            "Nothing".to_string()
         }
 
         fn __bool__(&self) -> bool {
@@ -63,8 +63,8 @@ mod _core {
             false
         }
 
-        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<EmptySetIterator>> {
-            Py::new(slf.py(), EmptySetIterator)
+        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<NothingIterator>> {
+            Py::new(slf.py(), NothingIterator)
         }
 
         /// Match the hash algorithm used by the builtin- frozenset type, for n=0
@@ -143,7 +143,7 @@ mod _core {
                 Ok(_) => Ok(true),
                 Err(_) => {
                     let error_msg = format!(
-                        "unsupported operand type: 'EmptySet' and '{}'",
+                        "unsupported operand type: 'Nothing' and '{}'",
                         other.get_type().name()?
                     );
                     Err(PyTypeError::new_err(error_msg))
@@ -153,5 +153,6 @@ mod _core {
     }
 
     #[pymodule_export]
-    const EMPTY_SET: EmptySetType = EmptySetType;
+    #[allow(non_upper_case_globals)]
+    const Nothing: NothingType = NothingType;
 }
