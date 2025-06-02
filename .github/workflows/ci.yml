@@ -16,9 +16,9 @@ env:
   RUSTFLAGS: "-Dwarnings"
 
 jobs:
-  lint:
+  lint_python:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -38,8 +38,25 @@ jobs:
           args: "format --check --diff"
           version-file: "pyproject.toml"
 
+  lint_rust:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
       - name: clippy
         run: cargo clippy --all-targets --all-features
+
+      - uses: mbrobbel/rustfmt-check@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          mode: review
 
   typecheck:
     runs-on: ${{ matrix.os }}
