@@ -1,0 +1,67 @@
+name: CI
+permissions: read-all
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  UV_LOCKED: 1
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: typos
+        uses: crate-ci/typos@master
+
+      - name: ruff check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check --output-format=github"
+          version-file: "pyproject.toml"
+
+      - name: ruff format
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check --diff"
+          version-file: "pyproject.toml"
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pyright
+        uses: jakebailey/pyright-action@v2
+
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        py: ["3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.py }}
+
+      - name: pytest
+        run: uv run pytest
