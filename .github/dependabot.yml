@@ -1,0 +1,43 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "⬆️ "
+    labels:
+      - "env: github-actions"
+      - "topic: dependabot"
+    groups:
+      ci:
+        patterns: ["*"]
+
+  # Rust
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "⬆️ "
+    labels:
+      - "env: rust"
+      - "topic: dependabot"
+    groups:
+      rust:
+        patterns: ["*"]
+
+  # Python
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "⬆️ "
+    labels:
+      - "env: python"
+      - "topic: dependabot"
+    groups:
+      python:
+        patterns: ["*"]
