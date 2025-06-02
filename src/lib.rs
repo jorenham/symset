@@ -1,11 +1,11 @@
 use pyo3::basic::CompareOp;
+use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::PyFrozenSet;
 use std::sync::OnceLock;
 
 #[pymodule]
 mod _core {
-
     use super::*;
 
     #[pyclass(frozen)]
@@ -70,6 +70,28 @@ mod _core {
                 CompareOp::Gt => empty.gt(other),
                 CompareOp::Ge => empty.ge(other),
             }
+        }
+
+        fn __and__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, Self>> {
+            let py = other.py();
+            let abstract_set_type = PyModule::import(py, "typing")?.getattr("AbstractSet")?;
+            if other.is_instance(&abstract_set_type)? {
+                Ok(slf.into_pyobject(py).unwrap())
+            } else {
+                Err(PyTypeError::new_err(
+                    "Expected an instance of typing.AbstractSet",
+                ))
+            }
+        }
+
+        fn __rand__<'py>(
+            slf: PyRef<'py, Self>,
+            other: Bound<'py, PyAny>,
+        ) -> PyResult<Bound<'py, Self>> {
+            Self::__and__(slf, other)
         }
 
         // TODO: implement the following `typing.AbstractSet` methods

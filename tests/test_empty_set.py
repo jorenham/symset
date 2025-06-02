@@ -139,3 +139,19 @@ def test_gt() -> None:
         _ = EmptySet > []  # pyright: ignore[reportOperatorIssue]
     with pytest.raises(TypeError):
         _ = EmptySet > {}  # pyright: ignore[reportOperatorIssue]
+
+
+def test_and() -> None:
+    assert EmptySet & EmptySet is EmptySet
+    assert EmptySet & _EMPTY_FROZENSET is EmptySet
+    assert EmptySet & _EMPTY_BUILTIN_SET is EmptySet
+
+    assert EmptySet & {object()} is EmptySet
+    assert EmptySet & frozenset({object()}) is EmptySet
+
+    with pytest.raises(TypeError):
+        _ = EmptySet > ()  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet > []  # pyright: ignore[reportOperatorIssue]
+    with pytest.raises(TypeError):
+        _ = EmptySet > {}  # pyright: ignore[reportOperatorIssue]
