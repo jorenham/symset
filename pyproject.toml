@@ -6,16 +6,32 @@ build-backend = "maturin"
 [project]
 name = "symset"
 version = "0.0.0"
-description = "Symbolic set types for Python, written in tust"
+description = "Symbolic Sets for Python, written in Rust"
 readme = "README.md"
-authors = [
-    {name = "Joren Hammudoglu", email = "jhammudoglu@gmail.com"},
+authors = [{name = "Joren Hammudoglu", email = "jhammudoglu@gmail.com"}]
+license = "BSD-3-Clause"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Rust",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.13"
 dependencies = []
 
-[project.scripts]
-symset = "symset:main"
+[project.urls]
+Repository = "https://github.com/jorenham/symset/"
+Issues = "https://github.com/jorenham/symset/issues"
+Changelog = "https://github.com/jorenham/symset/releases"
 
 
 [dependency-groups]
@@ -68,7 +84,6 @@ reportUnnecessaryTypeIgnoreComment = true
 src = ["src"]
 extend-exclude = [".git", ".cache", ".mypy_cache", "debug", "target"]
 force-exclude = true
-line-length = 120
 preview = true
 
 [tool.ruff.format]
