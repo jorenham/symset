@@ -13,11 +13,12 @@ concurrency:
 
 env:
   UV_LOCKED: 1
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 2
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +37,9 @@ jobs:
         with:
           args: "format --check --diff"
           version-file: "pyproject.toml"
+
+      - name: clippy
+        run: cargo clippy --all-targets --all-features
 
   typecheck:
     runs-on: ${{ matrix.os }}
