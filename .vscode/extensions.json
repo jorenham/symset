@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "eamodio.gitlens",
+    "fill-labs.dependi",
+    "ms-python.python",
+    "panicbit.cargo",
+    "rust-lang.rust-analyzer",
+    "seatonjiang.gitmoji-vscode",
+    "vadimcn.vscode-lldb"
+  ]
+}
