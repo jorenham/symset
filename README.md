@@ -13,6 +13,6 @@ Linting, formatting, typechecking, and testing:
 ```shell
 uv run ruff check
 uv run ruff format
-uv run pyright
+uv run basedpyright
 uv run pytest
 ```

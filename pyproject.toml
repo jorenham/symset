@@ -38,7 +38,7 @@ Changelog = "https://github.com/jorenham/symset/releases"
 dev = [
     "maturin>=1.8.6",
     "maturin-import-hook>=0.2.0",
-    "pyright>=1.1.401",
+    "basedpyright>=1.29.2",
     "pytest>=8.3.5",
     "ruff>=0.11.12",
 ]
