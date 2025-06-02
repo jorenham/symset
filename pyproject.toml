@@ -1,0 +1,89 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+
+[project]
+name = "symset"
+version = "0.0.0"
+description = "Symbolic set types for Python, written in tust"
+readme = "README.md"
+authors = [
+    {name = "Joren Hammudoglu", email = "jhammudoglu@gmail.com"},
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+symset = "symset:main"
+
+
+[dependency-groups]
+dev = [
+    "maturin>=1.8.6",
+    "maturin-import-hook>=0.2.0",
+    "pyright>=1.1.401",
+    "pytest>=8.3.5",
+    "ruff>=0.11.12",
+]
+
+
+[tool.maturin]
+module-name = "symset._core"
+python-packages = ["symset"]
+python-source = "src"
+
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+filterwarnings = ["error"]
+log_cli_level = "INFO"
+xfail_strict = true
+
+
+[tool.pyright]
+include = ["src", "tests"]
+ignore = [".venv"]
+# stubPath = "."
+pythonPlatform = "All"
+typeCheckingMode = "strict"
+deprecateTypingAliases = true
+enableReachabilityAnalysis = false
+enableTypeIgnoreComments = false
+reportCallInDefaultInitializer = true
+reportImplicitOverride = true
+reportImplicitStringConcatenation = false
+reportImportCycles = true
+reportMissingSuperCall = true
+reportPrivateImportUsage = false
+reportPrivateUsage = false
+reportShadowedImports = true
+reportUninitializedInstanceVariable = true
+reportUnusedImport = false
+reportUnnecessaryTypeIgnoreComment = true
+
+
+[tool.ruff]
+src = ["src"]
+extend-exclude = [".git", ".cache", ".mypy_cache", "debug", "target"]
+force-exclude = true
+line-length = 120
+preview = true
+
+[tool.ruff.format]
+line-ending = "lf"
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["CPY", "FIX", "TD", "COM812"]
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+combine-as-imports = true
+extra-standard-library = ["_typeshed", "typing_extensions"]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

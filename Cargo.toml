@@ -1,0 +1,11 @@
+[package]
+name = "symset"
+version = "0.0.0"
+edition = "2024"
+
+[lib]
+name = "_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = {version = "0.25.0", features = ["extension-module", "abi3-py313"]}
