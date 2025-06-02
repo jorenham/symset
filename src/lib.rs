@@ -4,7 +4,6 @@ use pyo3::types::PyFrozenSet;
 
 #[pymodule]
 mod _core {
-
     use super::*;
 
     #[pyclass(frozen)]
@@ -28,21 +27,20 @@ mod _core {
             0
         }
 
-        fn __contains__(&self, _item: &str) -> bool {
+        fn __contains__(&self, _item: PyObject) -> bool {
             false
         }
 
-        fn __hash__<'py>(slf: Bound<'py, Self>) -> isize {
+        fn __hash__(slf: Bound<'_, Self>) -> isize {
             PyFrozenSet::empty(slf.py()).unwrap().hash().unwrap()
         }
 
-        // fn __hash__<'py>(slf: Bound<'py, Self>) -> PyResult<isize> {
-        //     let builtins = slf.py().import("builtins")?;
-        //     builtins.getattr("frozenset")?.call1(())?.hash()
-        // }
-
-        fn __richcmp__<'py>(&self, other: Bound<'py, PyAny>, op: CompareOp) -> PyResult<bool> {
-            let empty = PyFrozenSet::empty(other.py()).unwrap();
+        fn __richcmp__<'py>(
+            slf: Bound<'py, Self>,
+            other: Bound<'py, PyAny>,
+            op: CompareOp,
+        ) -> PyResult<bool> {
+            let empty = PyFrozenSet::empty(slf.py()).unwrap();
             match op {
                 CompareOp::Lt => empty.lt(other),
                 CompareOp::Le => empty.le(other),
