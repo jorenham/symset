@@ -2,13 +2,13 @@
 
 from collections.abc import Set as AbstractSet
 
-from ._core import Nothing, NothingType
+from ._core import Empty, EmptyType
 
-AbstractSet.register(NothingType)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+AbstractSet.register(EmptyType)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
 del AbstractSet
 
 
-__all__ = "Nothing", "NothingType"
+__all__ = "Empty", "EmptyType"
 
 
 def __dir__() -> tuple[str, ...]:
