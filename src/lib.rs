@@ -1,34 +1,18 @@
 use pyo3::basic::CompareOp;
-use pyo3::exceptions::PyOverflowError;
-use pyo3::exceptions::PyTypeError;
+use pyo3::exceptions::{PyOverflowError, PyTypeError};
+use pyo3::prelude::*;
 use pyo3::types::PyFrozenSet;
-use pyo3::{PyClass, prelude::*};
 
 /// The `hash(frozenset({}))` value, confirmed to be system-independent by inspecting the algorithm
-const HASH_EMPTY: isize = 133146708735736;
+const HASH_EMPTY: isize = 133_146_708_735_736;
 const HASH_UNIVERSE: isize = (usize::MAX ^ HASH_EMPTY as usize) as isize;
 
 fn is_set(other: &Bound<'_, PyAny>) -> PyResult<bool> {
-    let abstract_set_type = PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?;
-    other.is_instance(&abstract_set_type)
-}
-
-fn require_set<'py, T: PyClass, R>(
-    slf: PyRef<'py, T>,
-    other: Bound<'py, PyAny>,
-    to_result: fn(PyRef<'py, T>, Bound<'py, PyAny>) -> PyResult<Bound<'py, R>>,
-) -> PyResult<Bound<'py, R>> {
-    if is_set(&other)? {
-        to_result(slf, other)
-    } else {
-        Err(PyTypeError::new_err("not a set"))
-    }
+    other.is_instance(&PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?)
 }
 
 #[pymodule]
 mod _core {
-    use pyo3::IntoPyObjectExt;
-
     use super::*;
 
     #[pyclass(frozen)]
@@ -45,11 +29,16 @@ mod _core {
         }
     }
 
-    #[pyclass(frozen)]
+    #[pyclass(frozen, module = "symset")]
     pub struct EmptyType;
 
     #[pymethods]
     impl EmptyType {
+        #[staticmethod]
+        fn get(py: Python<'_>) -> Bound<'_, Self> {
+            Empty.into_pyobject(py).unwrap()
+        }
+
         fn __str__(&self) -> String {
             "∅".to_string()
         }
@@ -92,26 +81,30 @@ mod _core {
             slf: PyRef<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, Self>> {
-            require_set(slf, other, |slf_, other_| {
-                Ok(slf_.into_pyobject(other_.py())?)
-            })
+            if is_set(&other)? {
+                Ok(slf.into_pyobject(other.py())?)
+            } else {
+                Err(PyTypeError::new_err("not a set"))
+            }
         }
 
         fn __or__<'py>(
-            slf: PyRef<'py, Self>,
+            slf: Bound<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, PyAny>> {
-            require_set(slf, other, |slf_, other_| {
-                Ok(if other_.is_truthy()? {
-                    other_
+            if is_set(&other)? {
+                Ok(if other.is_truthy()? {
+                    other
                 } else {
-                    slf_.into_bound_py_any(other_.py())?
+                    slf.into_any()
                 })
-            })
+            } else {
+                Err(PyTypeError::new_err("not a set"))
+            }
         }
 
         fn __xor__<'py>(
-            slf: PyRef<'py, Self>,
+            slf: Bound<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, PyAny>> {
             Self::__or__(slf, other)
@@ -125,7 +118,7 @@ mod _core {
         }
 
         fn __rsub__<'py>(
-            slf: PyRef<'py, Self>,
+            slf: Bound<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, PyAny>> {
             Self::__or__(slf, other)
@@ -138,13 +131,23 @@ mod _core {
                 Err(PyTypeError::new_err("not iterable"))
             }
         }
+
+        #[getter(C)]
+        fn complement<'py>(&self, py: Python<'py>) -> Bound<'py, UniverseType> {
+            UniverseType::get(py)
+        }
     }
 
-    #[pyclass(frozen)]
+    #[pyclass(frozen, module = "symset")]
     pub struct UniverseType;
 
     #[pymethods]
     impl UniverseType {
+        #[staticmethod]
+        fn get(py: Python<'_>) -> Bound<'_, Self> {
+            Universe.into_pyobject(py).unwrap()
+        }
+
         fn __str__(&self) -> String {
             "U".to_string()
         }
@@ -177,68 +180,53 @@ mod _core {
             HASH_UNIVERSE
         }
 
-        fn __richcmp__(&self, other: Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
-            let universe_py = Universe.into_bound_py_any(other.py())?.get_type();
-            let err = Err(PyTypeError::new_err("not a set"));
+        fn __richcmp__<'py>(
+            slf: Bound<'py, Self>,
+            other: Bound<'py, PyAny>,
+            op: CompareOp,
+        ) -> PyResult<bool> {
+            let universe_py = slf.get_type();
             let eq = other.is_instance(&universe_py)?;
+
+            fn set_or_err(other_: &Bound<'_, PyAny>, result: bool) -> PyResult<bool> {
+                if is_set(other_)? {
+                    Ok(result)
+                } else {
+                    Err(PyTypeError::new_err("not a set"))
+                }
+            }
+
             match op {
                 CompareOp::Eq => Ok(eq),
                 CompareOp::Ne => Ok(!eq),
-                CompareOp::Le => {
-                    if is_set(&other)? {
-                        Ok(eq)
-                    } else {
-                        err
-                    }
-                }
-                CompareOp::Gt => {
-                    if is_set(&other)? {
-                        Ok(!eq)
-                    } else {
-                        err
-                    }
-                }
-                CompareOp::Lt => {
-                    if is_set(&other)? {
-                        Ok(false)
-                    } else {
-                        err
-                    }
-                }
-                CompareOp::Ge => {
-                    if is_set(&other)? {
-                        Ok(true)
-                    } else {
-                        err
-                    }
-                }
+                CompareOp::Le => set_or_err(&other, eq),
+                CompareOp::Gt => set_or_err(&other, !eq),
+                CompareOp::Lt => set_or_err(&other, false),
+                CompareOp::Ge => set_or_err(&other, true),
             }
         }
 
-        fn __and__<'py>(
-            slf: PyRef<'py, Self>,
-            other: Bound<'py, PyAny>,
-        ) -> PyResult<Bound<'py, PyAny>> {
-            require_set(slf, other, |_, other_| {
-                Ok(if !other_.is_truthy()? {
-                    Empty.into_bound_py_any(other_.py())?
-                } else {
-                    other_
-                })
-            })
+        fn __and__<'py>(&self, other: Bound<'py, PyAny>) -> PyResult<Bound<'py, PyAny>> {
+            if is_set(&other)? {
+                Ok(other)
+            } else {
+                Err(PyTypeError::new_err("not a set"))
+            }
         }
 
         fn __or__<'py>(
             slf: PyRef<'py, Self>,
             other: Bound<'py, PyAny>,
-        ) -> PyResult<Bound<'py, Self>> {
-            require_set(slf, other, |slf_, other_| {
-                Ok(slf_.into_pyobject(other_.py())?)
-            })
+        ) -> PyResult<PyRef<'py, Self>> {
+            if is_set(&other)? {
+                Ok(slf)
+            } else {
+                Err(PyTypeError::new_err("not a set"))
+            }
         }
 
         fn __xor__<'py>(
-            slf: PyRef<'py, Self>,
+            slf: Bound<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, PyAny>> {
             if !is_set(&other)? {
@@ -246,24 +234,25 @@ mod _core {
             }
 
             match other.len() {
-                Err(_) => Empty.into_bound_py_any(slf.py()),
-                Ok(0) => Universe.into_bound_py_any(slf.py()),
+                Err(_) => Ok(EmptyType::get(other.py()).into_any()),
+                Ok(0) => Ok(slf.into_any()),
                 Ok(_) => todo!("finite non-empty set complement"),
             }
         }
 
         fn __sub__<'py>(
-            slf: PyRef<'py, Self>,
+            slf: Bound<'py, Self>,
             other: Bound<'py, PyAny>,
         ) -> PyResult<Bound<'py, PyAny>> {
             Self::__xor__(slf, other)
         }
 
-        fn __rsub__<'py>(
-            slf: PyRef<'py, Self>,
-            other: Bound<'py, PyAny>,
-        ) -> PyResult<Bound<'py, EmptyType>> {
-            require_set(slf, other, |_, other_| Empty.into_pyobject(other_.py()))
+        fn __rsub__<'py>(&self, other: Bound<'py, PyAny>) -> PyResult<Bound<'py, EmptyType>> {
+            if is_set(&other)? {
+                Ok(EmptyType::get(other.py()))
+            } else {
+                Err(PyTypeError::new_err("not a set"))
+            }
         }
 
         fn isdisjoint(&self, other: Bound<'_, PyAny>) -> PyResult<bool> {
@@ -272,6 +261,11 @@ mod _core {
             } else {
                 Err(PyTypeError::new_err("not iterable"))
             }
+        }
+
+        #[getter(C)]
+        fn complement<'py>(&self, py: Python<'py>) -> Bound<'py, EmptyType> {
+            EmptyType::get(py)
         }
     }
 

@@ -150,9 +150,9 @@ def test_gt() -> None:
 
 def test_and() -> None:
     assert Universe & Universe == Universe
-    assert repr(Universe & Empty) == "Empty"
-    assert repr(Universe & _EMPTY_FROZENSET) == "Empty"
-    assert repr(Universe & _EMPTY_BUILTIN_SET) == "Empty"
+    assert Universe & Empty == Empty
+    assert Universe & _EMPTY_FROZENSET == Empty
+    assert Universe & _EMPTY_BUILTIN_SET == Empty
 
     s1 = {object()}
     f1 = frozenset({object()})
@@ -187,7 +187,7 @@ def test_or() -> None:
 
 
 def test_xor() -> None:
-    assert repr(Universe ^ Universe) == "Empty"
+    assert Universe ^ Universe == Empty
     assert Universe ^ Empty == Universe
     assert Universe ^ _EMPTY_FROZENSET == Universe
     assert Universe ^ _EMPTY_BUILTIN_SET == Universe
@@ -207,10 +207,10 @@ def test_xor() -> None:
 
 
 def test_sub() -> None:
-    assert repr(Universe - Universe) == "Empty"
-    assert Universe - Empty == Universe
-    assert Universe - _EMPTY_FROZENSET == Universe
-    assert Universe - _EMPTY_BUILTIN_SET == Universe
+    assert Universe - Universe == Empty
+    assert Universe - Empty is Universe
+    assert Universe - _EMPTY_FROZENSET is Universe
+    assert Universe - _EMPTY_BUILTIN_SET is Universe
 
     # TODO
     with pytest.raises(BaseException, match=r"not yet implemented:.*"):
@@ -227,9 +227,8 @@ def test_sub() -> None:
 
 
 def test_rsub() -> None:
-    assert repr(Empty - Universe) == "Empty"
-    assert repr(_EMPTY_FROZENSET - Universe) == "Empty"
-    assert repr(_EMPTY_BUILTIN_SET - Universe) == "Empty"
+    assert _EMPTY_FROZENSET - Universe == Empty
+    assert _EMPTY_BUILTIN_SET - Universe == Empty
 
     s1 = {object()}
     f1 = frozenset({object()})
@@ -259,3 +258,7 @@ def test_isdisjoint() -> None:
         _ = Universe.isdisjoint(object())  # pyright: ignore[reportArgumentType]
     with pytest.raises(TypeError):
         _ = Universe.isdisjoint(EmptyType)  # pyright: ignore[reportArgumentType]
+
+
+def test_complement() -> None:
+    assert Universe.C == Empty, (Universe.C, Empty)

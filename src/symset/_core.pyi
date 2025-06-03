@@ -41,6 +41,8 @@ class EmptyType(AbstractSet[Never]):
     def __xor__[ST: _AnySet](self, other: ST, /) -> ST: ...
     @override
     def isdisjoint(self, other: Iterable[Any], /) -> Literal[True]: ...
+    @property
+    def C(self, /) -> UniverseType: ...  # noqa: N802
 
 @final
 class UniverseType(AbstractSet[Never]):
@@ -78,6 +80,8 @@ class UniverseType(AbstractSet[Never]):
     def __xor__[ST: _AnySet](self, other: ST, /) -> ST | EmptyType: ...
     @override
     def isdisjoint(self, other: Iterable[Any], /) -> bool: ...  # raises if not a set
+    @property
+    def C(self, /) -> EmptyType: ...  # noqa: N802
 
 Empty: Final[EmptyType] = ...
 Universe: Final[UniverseType] = ...
