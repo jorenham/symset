@@ -8,7 +8,7 @@ Special sets
 
 - [x] `Empty` - The *empty set* or *void set*, $\displaystyle\varnothing⁠ = \{ \}$
 ([wiki](https://w.wiki/EMr$))
-- [ ] `Universe` - *Universe set* $\displaystyle\mathbf{U}⁠$ containing everything, including itself
+- [x] `Universe` - *Universe set* $\displaystyle\mathbf{U}⁠$ containing everything, including itself
 ([wiki](https://w.wiki/EMs4))
 
 Complement operations
