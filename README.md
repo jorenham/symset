@@ -7,18 +7,24 @@ Symbolic Sets for Python, written in Rust
 Special sets
 
 - [x] `Empty` - The *empty set* or *void set*, $\varnothing⁠ = \{\}$ ([wiki](https://w.wiki/EMr$))
-- [ ] `Universe` - *Universe set* $\boldsymbol U⁠$ containing everything, including itself ([wiki](https://w.wiki/EMs4))
+- [ ] `Universe` - *Universe set* $\mathbf{U}⁠$ containing everything, including itself
+([wiki](https://w.wiki/EMs4))
 
 Complement operations
 
-- [ ] `Complement[A]` - *Absolute complement* $A^\complement⁠=\boldsymbol U \setminus A$ ([wiki](https://w.wiki/ANo$))
-- [ ] `Difference[A, B]` - *Relative complement* or *set-theoretic difference* $A \setminus B$ ([wiki](https://w.wiki/ANo$#Relative_complement))
+- [ ] `Complement[A]` - *Absolute complement* $A^\complement⁠ = \mathbf{U} \setminus A$
+([wiki](https://w.wiki/ANo$))
+- [ ] `Difference[A, B]` - *Relative complement* or *set-theoretic difference* $A \setminus B$
+([wiki](https://w.wiki/ANo$#Relative_complement))
 
 External operations
 
-- [ ] `Subsets[A]` - *Power set* \mathcal P(A)$; the set of all subsets of $A$, with $|P(A)| = 2^{|A|}$ ([wiki](https://w.wiki/FMZ))
-- [ ] `Product[A, B]` - *Cartesian product* $A \times B$ with $n_A \cdot n_B$ elements ([wiki](https://w.wiki/zus))
-- [ ] `Sum[A, B]` - *Disjoint-* or *tagged union* (the *sum type* in type theory) $A \sqcup B$ with $n_A + n_B$ elements
+- [ ] `Subsets[A]` - *Power set* \mathcal P(A)$; the set of all subsets of $A$,
+with $|P(A)| = 2^{|A|}$ ([wiki](https://w.wiki/FMZ))
+- [ ] `Product[A, B]` - *Cartesian product* $A \times B$ with $n_A \cdot n_B$ elements
+([wiki](https://w.wiki/zus))
+- [ ] `Sum[A, B]` - *Disjoint-* or *tagged union* (the *sum type* in type theory) $A \sqcup B$
+with $n_A + n_B$ elements
 
 ## Development
 
