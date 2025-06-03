@@ -6,7 +6,7 @@ from typing import Final, Never
 import pytest
 from hypothesis import given, strategies as st
 
-from symset import Empty, EmptyType
+from symset import Empty, EmptyType, Universe
 
 _EMPTY_BUILTIN_SET: Final[set[Never]] = set()
 _EMPTY_FROZENSET: Final[frozenset[Never]] = frozenset(())
@@ -241,3 +241,7 @@ def test_isdisjoint() -> None:
         _ = Empty.isdisjoint(object())  # pyright: ignore[reportArgumentType]
     with pytest.raises(TypeError):
         _ = Empty.isdisjoint(EmptyType)  # pyright: ignore[reportArgumentType]
+
+
+def test_complement() -> None:
+    assert Empty.C == Universe, (Empty.C, Universe)
