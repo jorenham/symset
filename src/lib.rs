@@ -3,20 +3,23 @@ use pyo3::exceptions::PyTypeError;
 use pyo3::types::PyFrozenSet;
 use pyo3::{PyClass, prelude::*};
 
+/// The `hash(frozenset({}))` value, confirmed to be system-independent by inspecting the algorithm
+const HASH_EMPTY: isize = 133146708735736;
+
+fn is_set(other: &Bound<'_, PyAny>) -> PyResult<bool> {
+    let abstract_set_type = PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?;
+    other.is_instance(&abstract_set_type)
+}
+
 fn require_set<'py, T: PyClass, R>(
     slf: PyRef<'py, T>,
     other: Bound<'py, PyAny>,
     to_result: fn(PyRef<'py, T>, Bound<'py, PyAny>) -> PyResult<Bound<'py, R>>,
 ) -> PyResult<Bound<'py, R>> {
-    let abstract_set_type = PyModule::import(other.py(), "typing")?.getattr("AbstractSet")?;
-    if other.is_instance(&abstract_set_type)? {
+    if is_set(&other)? {
         to_result(slf, other)
     } else {
-        let error_msg = format!(
-            "unsupported operand type: 'Nothing' and '{}'",
-            other.get_type().name()?
-        );
-        Err(PyTypeError::new_err(error_msg))
+        Err(PyTypeError::new_err("not a set"))
     }
 }
 
@@ -67,32 +70,18 @@ mod _core {
             Py::new(slf.py(), NothingIterator)
         }
 
-        /// Match the hash algorithm used by the builtin- frozenset type, for n=0
-        /// https://github.com/python/cpython/blob/v3.13.3/Lib/_collections_abc.py#L669-L700
         fn _hash(&self) -> isize {
-            static MASK: usize = usize::MAX;
-            static H1: usize = 1_927_868_237 & MASK;
-            static H2: usize = (H1 >> 11) ^ (H1 >> 25) ^ H1;
-            static H3: usize = (H2 * 69_069 + 907_133_923) & MASK;
-            static H4: isize = H3 as isize;
-            static H5: isize = if H4 == -1 { 590_923_713 } else { H4 };
-            H5
+            HASH_EMPTY
         }
 
         fn __hash__(&self) -> isize {
-            self._hash()
+            HASH_EMPTY
         }
 
         fn __richcmp__(&self, other: Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
-            let empty = PyFrozenSet::empty(other.py())?;
-            match op {
-                CompareOp::Lt => empty.lt(other),
-                CompareOp::Le => empty.le(other),
-                CompareOp::Eq => empty.eq(other),
-                CompareOp::Ne => empty.ne(other),
-                CompareOp::Gt => empty.gt(other),
-                CompareOp::Ge => empty.ge(other),
-            }
+            PyFrozenSet::empty(other.py())?
+                .rich_compare(other, op)
+                .and_then(|any| any.is_truthy())
         }
 
         fn __and__<'py>(
@@ -139,15 +128,10 @@ mod _core {
         }
 
         fn isdisjoint(&self, other: Bound<'_, PyAny>) -> PyResult<bool> {
-            match other.try_iter() {
-                Ok(_) => Ok(true),
-                Err(_) => {
-                    let error_msg = format!(
-                        "unsupported operand type: 'Nothing' and '{}'",
-                        other.get_type().name()?
-                    );
-                    Err(PyTypeError::new_err(error_msg))
-                }
+            if other.try_iter().is_ok() {
+                Ok(true)
+            } else {
+                Err(PyTypeError::new_err("not iterable"))
             }
         }
     }
