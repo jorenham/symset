@@ -21,7 +21,7 @@ def test_subclass_abc() -> None:
 
 def test_cannot_construct() -> None:
     with pytest.raises(TypeError):
-        _ = EmptyType()
+        _ = EmptyType()  # pyright: ignore[reportGeneralTypeIssues]
 
 
 def test_no_dict() -> None:
