@@ -28,10 +28,10 @@ mod _core {
     use super::*;
 
     #[pyclass(frozen)]
-    struct NothingIterator;
+    struct EmptyIterator;
 
     #[pymethods]
-    impl NothingIterator {
+    impl EmptyIterator {
         fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
             slf
         }
@@ -42,16 +42,16 @@ mod _core {
     }
 
     #[pyclass(frozen)]
-    pub struct NothingType;
+    pub struct EmptyType;
 
     #[pymethods]
-    impl NothingType {
+    impl EmptyType {
         fn __str__(&self) -> String {
             "∅".to_string()
         }
 
         fn __repr__(&self) -> String {
-            "Nothing".to_string()
+            "Empty".to_string()
         }
 
         fn __bool__(&self) -> bool {
@@ -66,8 +66,8 @@ mod _core {
             false
         }
 
-        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<NothingIterator>> {
-            Py::new(slf.py(), NothingIterator)
+        fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<EmptyIterator>> {
+            Py::new(slf.py(), EmptyIterator)
         }
 
         fn _hash(&self) -> isize {
@@ -138,5 +138,5 @@ mod _core {
 
     #[pymodule_export]
     #[allow(non_upper_case_globals)]
-    const Nothing: NothingType = NothingType;
+    const Empty: EmptyType = EmptyType;
 }

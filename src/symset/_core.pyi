@@ -4,7 +4,7 @@ from collections.abc import Iterable, Iterator, Set as AbstractSet
 from typing import Any, Final, Literal, Never, NoReturn, Self, final, override
 
 @final
-class NothingType(AbstractSet[Never]):
+class EmptyType(AbstractSet[Never]):
     def __new__(cls, /) -> NoReturn: ...  # raises TypeError
     def __init__(self, /) -> NoReturn: ...  # raises TypeError
     def __bool__(self, /) -> Literal[False]: ...
@@ -39,4 +39,4 @@ class NothingType(AbstractSet[Never]):
     @override
     def isdisjoint(self, other: Iterable[Any], /) -> bool: ...  # TODO: impl
 
-Nothing: Final[NothingType] = ...
+Empty: Final[EmptyType] = ...
