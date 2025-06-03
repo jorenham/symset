@@ -6,7 +6,8 @@ Symbolic Sets for Python, written in Rust
 
 Special sets
 
-- [x] `Empty` - The *empty set* or *void set*, $\displaystyle\varnothing⁠ = \{\}$ ([wiki](https://w.wiki/EMr$))
+- [x] `Empty` - The *empty set* or *void set*, $\displaystyle\varnothing⁠ = \{ \}$
+([wiki](https://w.wiki/EMr$))
 - [ ] `Universe` - *Universe set* $\displaystyle\mathbf{U}⁠$ containing everything, including itself
 ([wiki](https://w.wiki/EMs4))
 
@@ -19,10 +20,10 @@ $\displaystyle A \setminus B$ ([wiki](https://w.wiki/ANo$#Relative_complement))
 
 External operations
 
-- [ ] `Subsets[A]` - *Power set* $\displaystyle\mathcal P(A)$; the set of all subsets of
-$\displaystyle A$, with $\displaystyle |P(A)| = 2^{|A|}$ ([wiki](https://w.wiki/FMZ))
-- [ ] `Product[A, B]` - *Cartesian product* $\displaystyle A \times B$ with $n_A \cdot n_B$ elements
-([wiki](https://w.wiki/zus))
+- [ ] `Subsets[A]` - *Power set* $\displaystyle\mathcal{P}(A)$; the set of all subsets of
+$\displaystyle A$, with $\displaystyle \left|P(A)\right|$ ([wiki](https://w.wiki/FMZ))
+- [ ] `Product[A, B]` - *Cartesian product* $\displaystyle A \times B$ with
+$\displaystyle n_A \cdot n_B$ elements ([wiki](https://w.wiki/zus))
 - [ ] `Sum[A, B]` - *Disjoint-* or *tagged union* (the *sum type* in type theory)
 $\displaystyle A \sqcup B$ with $\displaystyle n_A + n_B$ elements
 
