@@ -1,4 +1,5 @@
 """Symbolic sets."""
+
 import sys
 from typing import Final
 
