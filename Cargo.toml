@@ -7,5 +7,6 @@ edition = "2024"
 name = "_core"
 crate-type = ["cdylib"]
 
-[dependencies]
-pyo3 = {version = "0.25.0", features = ["extension-module", "abi3-py313"]}
+[dependencies.pyo3]
+version = "0.25.0"
+features = ["extension-module", "abi3-py313"]
