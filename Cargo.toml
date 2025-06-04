@@ -2,6 +2,11 @@
 name = "symset"
 version = "0.0.0"
 edition = "2024"
+rust-version = "1.87"
+repository = "https://github.com/jorenham/symset/"
+authors = ["Joren Hammudoglu <jhammudoglu@gmail.com>"]
+license = "BSD-3-Clause"
+readme = "README.md"
 
 [lib]
 name = "_core"
@@ -9,4 +14,4 @@ crate-type = ["cdylib"]
 
 [dependencies.pyo3]
 version = "0.25.0"
-features = ["extension-module", "abi3-py313"]
+features = ["extension-module", "abi3-py311"]
