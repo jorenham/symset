@@ -240,7 +240,7 @@ mod _core {
                     } else {
                         Err(e)
                     }
-                }
+                },
                 Ok(0) => Ok(UniverseType::get(py).into_any()),
                 Ok(_) => Err(PyNotImplementedError::new_err(
                     "non-empty finite set complement is not supported yet",
