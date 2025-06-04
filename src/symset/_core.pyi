@@ -1,12 +1,14 @@
 # pyright: reportIncompatibleMethodOverride=false
 
 from collections.abc import Iterable, Iterator, Set as AbstractSet
-from typing import Any, Final, Literal, Never, Self, final, override
+from typing import Any, Literal, Never, Self, final, override
 
 type _AnySet = AbstractSet[Any]
 
 @final
 class EmptyType(AbstractSet[Never]):
+    @staticmethod
+    def get() -> EmptyType: ...
     def __new__(cls: Never, /) -> Never: ...  # raises TypeError
     def __init__(self: Never, /) -> Never: ...  # raises TypeError
     def __bool__(self, /) -> Literal[False]: ...
@@ -46,6 +48,8 @@ class EmptyType(AbstractSet[Never]):
 
 @final
 class UniverseType(AbstractSet[Never]):
+    @staticmethod
+    def get() -> UniverseType: ...
     def __new__(cls: Never, /) -> Never: ...  # raises TypeError
     def __init__(self: Never, /) -> Never: ...  # raises TypeError
     def __bool__(self, /) -> Literal[True]: ...
@@ -82,6 +86,3 @@ class UniverseType(AbstractSet[Never]):
     def isdisjoint(self, other: Iterable[Any], /) -> bool: ...  # raises if not a set
     @property
     def C(self, /) -> EmptyType: ...  # noqa: N802
-
-Empty: Final[EmptyType] = ...
-Universe: Final[UniverseType] = ...
