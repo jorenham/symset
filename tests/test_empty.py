@@ -10,7 +10,6 @@ from symset import Empty, EmptyType, Universe
 
 _EMPTY_BUILTIN_SET: Final[set[Never]] = set()
 _EMPTY_FROZENSET: Final[frozenset[Never]] = frozenset(())
-
 _FALSY_NON_SET: Final[tuple[object, ...]] = None, False, 0, 0.0, "", b"", (), [], {}
 
 

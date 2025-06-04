@@ -39,8 +39,8 @@ dev = [
     "maturin>=1.8.6",
     "maturin-import-hook>=0.2.0",
     "basedpyright>=1.29.2",
-    "pytest>=8.3.5",
-    "hypothesis>=6.133.0",
+    "pytest>=8.4.0",
+    "hypothesis>=6.135.0",
     "ruff>=0.11.12",
 ]
 
@@ -48,7 +48,7 @@ dev = [
 [tool.maturin]
 module-name = "symset._core"
 python-packages = ["symset"]
-python-source = "src"
+features = ["pyo3/extension-module"]
 
 
 [tool.pytest.ini_options]
@@ -60,9 +60,9 @@ xfail_strict = true
 
 
 [tool.pyright]
-include = ["src", "tests"]
-ignore = [".venv"]
-# stubPath = "."
+include = ["symset", "tests"]
+ignore = [".venv", "target"]
+stubPath = "."
 pythonPlatform = "All"
 typeCheckingMode = "strict"
 deprecateTypingAliases = true
@@ -82,7 +82,7 @@ reportUnnecessaryTypeIgnoreComment = true
 
 
 [tool.ruff]
-src = ["src"]
+src = ["symset", "tests"]
 extend-exclude = [".git", ".cache", ".mypy_cache", "debug", "target"]
 force-exclude = true
 preview = true
@@ -99,6 +99,7 @@ ignore = ["CPY", "FIX", "TD", "COM812"]
 case-sensitive = true
 combine-as-imports = true
 extra-standard-library = ["_typeshed", "typing_extensions"]
+known-first-party = ["symset"]
 split-on-trailing-comma = false
 
 [tool.ruff.lint.pydocstyle]
