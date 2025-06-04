@@ -1,9 +1,10 @@
 # pyright: reportIncompatibleMethodOverride=false
 
 from collections.abc import Iterable, Set as AbstractSet
-from typing import Any, Literal, Never, Self, TypeAlias, TypeVar, final, override
+from typing import Any, Literal, Never, Self, final
+from typing_extensions import TypeAliasType, TypeVar, override
 
-_AnySet: TypeAlias = AbstractSet[Any]
+_AnySet = TypeAliasType("_AnySet", AbstractSet[Any])
 _SetT = TypeVar("_SetT", bound=_AnySet)
 
 @final
