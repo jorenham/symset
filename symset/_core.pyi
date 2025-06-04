@@ -89,3 +89,6 @@ class UniverseType(AbstractSet[object]):
     def isdisjoint(self, other: Iterable[Any], /) -> bool: ...  # raises if not a set
     @property
     def C(self, /) -> EmptyType: ...  # noqa: N802
+
+Empty = EmptyType.get()
+Universe = UniverseType.get()

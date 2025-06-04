@@ -6,7 +6,7 @@ from typing import Final, Never
 import pytest
 from hypothesis import given, strategies as st
 
-from symset import Empty, EmptyType, Universe
+from symset import Empty, Universe
 
 _EMPTY_BUILTIN_SET: Final[set[Never]] = set()
 _EMPTY_FROZENSET: Final[frozenset[Never]] = frozenset(())
@@ -15,12 +15,12 @@ _FALSY_NON_SET: Final[tuple[object, ...]] = None, False, 0, 0.0, "", b"", (), []
 
 def test_subclass_abc() -> None:
     assert isinstance(Empty, AbstractSet)
-    assert issubclass(EmptyType, AbstractSet)
+    assert issubclass(type(Empty), AbstractSet)
 
 
 def test_cannot_construct() -> None:
     with pytest.raises(TypeError):
-        _ = EmptyType()  # pyright: ignore[reportGeneralTypeIssues]
+        _ = type(Empty)()  # pyright: ignore[reportGeneralTypeIssues]
 
 
 def test_no_dict() -> None:
@@ -238,8 +238,6 @@ def test_isdisjoint() -> None:
         _ = Empty.isdisjoint(None)  # pyright: ignore[reportArgumentType]
     with pytest.raises(TypeError):
         _ = Empty.isdisjoint(object())  # pyright: ignore[reportArgumentType]
-    with pytest.raises(TypeError):
-        _ = Empty.isdisjoint(EmptyType)  # pyright: ignore[reportArgumentType]
 
 
 def test_complement() -> None:

@@ -1,20 +1,24 @@
 """Symbolic sets."""
-
-from collections.abc import Set as AbstractSet
+import sys
 from typing import Final
 
-from ._core import EmptyType, UniverseType
+from . import _core
 
-AbstractSet.register(EmptyType)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
-AbstractSet.register(UniverseType)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
-del AbstractSet
+__all__ = "Empty", "EmptyType", "Universe", "UniverseType"
 
+if sys.version_info >= (3, 12):
+    from typing import TypeAliasType
 
-Empty: Final = EmptyType.get()
-Universe: Final = UniverseType.get()
+    EmptyType = TypeAliasType("EmptyType", _core.EmptyType)
+    UniverseType = TypeAliasType("UniverseType", _core.UniverseType)
+else:
+    from typing import TypeAlias
 
+    EmptyType: TypeAlias = _core.EmptyType
+    UniverseType: TypeAlias = _core.UniverseType
 
-__all__ = "Empty", "Universe"
+Empty: Final = _core.Empty
+Universe: Final = _core.Universe
 
 
 def __dir__() -> tuple[str, ...]:
