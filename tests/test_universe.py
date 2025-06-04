@@ -76,9 +76,7 @@ def test_eq() -> None:
     assert Universe is Universe
 
 
-@pytest.mark.parametrize(
-    "other", [*_FALSY_NON_SET, _EMPTY_FROZENSET, _EMPTY_BUILTIN_SET, Empty]
-)
+@pytest.mark.parametrize("other", [*_FALSY_NON_SET, _EMPTY_FROZENSET, _EMPTY_BUILTIN_SET, Empty])
 def test_ne(other: object) -> None:
     assert Universe != other
 
