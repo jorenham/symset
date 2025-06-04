@@ -1,6 +1,6 @@
 # pyright: reportIncompatibleMethodOverride=false
 
-from collections.abc import Iterable, Iterator, Set as AbstractSet
+from collections.abc import Iterable, Set as AbstractSet
 from typing import Any, Literal, Never, Self, final, override
 
 type _AnySet = AbstractSet[Any]
@@ -15,7 +15,8 @@ class EmptyType(AbstractSet[Never]):
     @override
     def __len__(self, /) -> Literal[0]: ...
     @override
-    def __iter__(self, /) -> Iterator[Never]: ...
+    def __iter__(self, /) -> Self: ...
+    def __next__(self, /) -> Never: ...
     @override
     def __contains__(self, x: object, /) -> Literal[False]: ...
     @override
