@@ -9,7 +9,7 @@ use pyo3::types::{PyFrozenSet, PyType};
 const HASH_EMPTY: isize = 133_146_708_735_736;
 const HASH_UNIVERSE: isize = (usize::MAX ^ HASH_EMPTY as usize) as isize;
 
-/// mimicks `pyo3::types::sequence::get_sequence_abc()`
+/// mimics `pyo3::types::sequence::get_sequence_abc()`
 fn get_set_abc(py: Python<'_>) -> PyResult<&Bound<'_, PyType>> {
     static SEQUENCE_ABC: GILOnceCell<Py<PyType>> = GILOnceCell::new();
 
