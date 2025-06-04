@@ -216,8 +216,8 @@ def test_rsub() -> None:
 
     s1 = {object()}
     f1 = frozenset({object()})
-    assert s1 - Empty == s1
-    assert f1 - Empty == f1
+    assert s1 - Empty is s1
+    assert f1 - Empty is f1
 
     with pytest.raises(TypeError):
         _ = () - Empty  # pyright: ignore[reportOperatorIssue]
@@ -244,4 +244,4 @@ def test_isdisjoint() -> None:
 
 
 def test_complement() -> None:
-    assert Empty.C == Universe, (Empty.C, Universe)
+    assert Empty.C is Universe, (Empty.C, Universe)

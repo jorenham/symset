@@ -73,7 +73,7 @@ def test_hash() -> None:
 
 
 def test_eq() -> None:
-    assert Universe == Universe
+    assert Universe is Universe
 
 
 @pytest.mark.parametrize(
@@ -149,10 +149,10 @@ def test_gt() -> None:
 
 
 def test_and() -> None:
-    assert Universe & Universe == Universe
-    assert Universe & Empty == Empty
-    assert Universe & _EMPTY_FROZENSET == Empty
-    assert Universe & _EMPTY_BUILTIN_SET == Empty
+    assert Universe & Universe is Universe
+    assert Universe & Empty is Empty
+    assert Universe & _EMPTY_FROZENSET is Empty
+    assert Universe & _EMPTY_BUILTIN_SET is Empty
 
     s1 = {object()}
     f1 = frozenset({object()})
@@ -187,16 +187,14 @@ def test_or() -> None:
 
 
 def test_xor() -> None:
-    assert Universe ^ Universe == Empty
-    assert Universe ^ Empty == Universe
-    assert Universe ^ _EMPTY_FROZENSET == Universe
-    assert Universe ^ _EMPTY_BUILTIN_SET == Universe
+    assert Universe ^ Universe is Empty
+    assert Universe ^ Empty is Universe
+    assert Universe ^ _EMPTY_FROZENSET is Universe
+    assert Universe ^ _EMPTY_BUILTIN_SET is Universe
 
-    # TODO
-    with pytest.raises(BaseException, match=r"not yet implemented:.*"):
+    # TODO: absolute complement
+    with pytest.raises(NotImplementedError):
         _ = Universe ^ {object()}
-    with pytest.raises(BaseException, match=r"not yet implemented:.*"):
-        _ = Universe ^ frozenset({object()})
 
     with pytest.raises(TypeError):
         _ = Universe ^ ()  # pyright: ignore[reportOperatorIssue]
@@ -207,16 +205,14 @@ def test_xor() -> None:
 
 
 def test_sub() -> None:
-    assert Universe - Universe == Empty
+    assert Universe - Universe is Empty
     assert Universe - Empty is Universe
     assert Universe - _EMPTY_FROZENSET is Universe
     assert Universe - _EMPTY_BUILTIN_SET is Universe
 
-    # TODO
-    with pytest.raises(BaseException, match=r"not yet implemented:.*"):
+    # TODO: absolute complement
+    with pytest.raises(NotImplementedError):
         _ = Universe - {object()}
-    with pytest.raises(BaseException, match=r"not yet implemented:.*"):
-        _ = Universe - frozenset({object()})
 
     with pytest.raises(TypeError):
         _ = Universe - ()  # pyright: ignore[reportOperatorIssue]
@@ -227,13 +223,13 @@ def test_sub() -> None:
 
 
 def test_rsub() -> None:
-    assert _EMPTY_FROZENSET - Universe == Empty
-    assert _EMPTY_BUILTIN_SET - Universe == Empty
+    assert _EMPTY_FROZENSET - Universe is Empty
+    assert _EMPTY_BUILTIN_SET - Universe is Empty
 
     s1 = {object()}
     f1 = frozenset({object()})
-    assert s1 - Universe == Empty
-    assert f1 - Universe == Empty
+    assert s1 - Universe is Empty
+    assert f1 - Universe is Empty
 
     with pytest.raises(TypeError):
         _ = () - Universe  # pyright: ignore[reportOperatorIssue]
@@ -261,4 +257,4 @@ def test_isdisjoint() -> None:
 
 
 def test_complement() -> None:
-    assert Universe.C == Empty, (Universe.C, Empty)
+    assert Universe.C is Empty, (Universe.C, Empty)
