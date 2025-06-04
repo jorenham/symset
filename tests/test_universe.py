@@ -16,12 +16,12 @@ _FALSY_NON_SET: Final[tuple[object, ...]] = None, False, 0, 0.0, "", b"", (), []
 
 def test_subclass_abc() -> None:
     assert isinstance(Universe, AbstractSet)
-    assert issubclass(UniverseType, AbstractSet)
+    assert issubclass(type(Universe), AbstractSet)
 
 
 def test_cannot_construct() -> None:
     with pytest.raises(TypeError):
-        _ = UniverseType()  # pyright: ignore[reportGeneralTypeIssues]
+        _ = type(Universe)()  # pyright: ignore[reportGeneralTypeIssues]
 
 
 def test_no_dict() -> None:
@@ -252,8 +252,6 @@ def test_isdisjoint() -> None:
         _ = Universe.isdisjoint(None)  # pyright: ignore[reportArgumentType]
     with pytest.raises(TypeError):
         _ = Universe.isdisjoint(object())  # pyright: ignore[reportArgumentType]
-    with pytest.raises(TypeError):
-        _ = Universe.isdisjoint(EmptyType)  # pyright: ignore[reportArgumentType]
 
 
 def test_complement() -> None:

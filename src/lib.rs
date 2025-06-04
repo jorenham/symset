@@ -26,6 +26,8 @@ type PyUniverse = Py<_core::UniverseType>;
 
 #[pymodule]
 mod _core {
+    use pyo3::PyTypeInfo;
+
     use super::*;
 
     #[pyclass(frozen, module = "symset")]
@@ -269,5 +271,21 @@ mod _core {
                 Err(PyTypeError::new_err("not iterable"))
             }
         }
+    }
+
+    #[pymodule_init]
+    fn init(m: &Bound<'_, PyModule>) -> PyResult<()> {
+        let py = m.py();
+
+        // Register `EmptyType` and `UniverseType` as subclasses of `collections.abc.Set`
+        let abc_set = get_set_abc(py)?;
+        abc_set.call_method1("register", (EmptyType::type_object(py),))?;
+        abc_set.call_method1("register", (UniverseType::type_object(py),))?;
+
+        // Singletons for Empty and Universe
+        m.add("Empty", EmptyType::get(py))?;
+        m.add("Universe", UniverseType::get(py))?;
+
+        Ok(())
     }
 }
