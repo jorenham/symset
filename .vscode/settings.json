@@ -1,7 +1,8 @@
 {
-  "[python|rust]": {
+  "[python]": {
     "editor.rulers": [100]
   },
-  "rust-analyzer.check.command": "clippy",
-  "rust-analyzer.inlayHints.bindingModeHints.enable": true
+  "[rust]": {
+    "editor.rulers": [100]
+  }
 }
