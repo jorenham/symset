@@ -2,7 +2,7 @@ use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::{PyNotImplementedError, PyOverflowError, PyTypeError};
 use pyo3::prelude::*;
-use pyo3::sync::GILOnceCell;
+use pyo3::sync::PyOnceLock;
 use pyo3::types::{PyFrozenSet, PyType};
 
 /// The `hash(frozenset({}))` value, confirmed to be system-independent by inspecting the algorithm
@@ -11,7 +11,7 @@ const HASH_UNIVERSE: isize = (usize::MAX ^ HASH_EMPTY as usize) as isize;
 
 /// mimics `pyo3::types::sequence::get_sequence_abc()`
 fn get_set_abc(py: Python<'_>) -> PyResult<&Bound<'_, PyType>> {
-    static SEQUENCE_ABC: GILOnceCell<Py<PyType>> = GILOnceCell::new();
+    static SEQUENCE_ABC: PyOnceLock<Py<PyType>> = PyOnceLock::new();
 
     SEQUENCE_ABC.import(py, "collections.abc", "Set")
 }
@@ -37,7 +37,7 @@ mod _core {
     impl EmptyType {
         #[staticmethod]
         fn get(py: Python<'_>) -> Py<Self> {
-            static CELL: GILOnceCell<PyEmpty> = GILOnceCell::new();
+            static CELL: PyOnceLock<PyEmpty> = PyOnceLock::new();
 
             CELL.get_or_try_init(py, || Py::new(py, Self))
                 .unwrap()
@@ -73,7 +73,7 @@ mod _core {
             slf
         }
 
-        fn __next__(&self) -> Option<PyObject> {
+        fn __next__(&self) -> Option<Py<PyAny>> {
             None
         }
 
@@ -139,7 +139,7 @@ mod _core {
     impl UniverseType {
         #[staticmethod]
         fn get(py: Python<'_>) -> Py<Self> {
-            static CELL: GILOnceCell<PyUniverse> = GILOnceCell::new();
+            static CELL: PyOnceLock<PyUniverse> = PyOnceLock::new();
 
             CELL.get_or_try_init(py, || Py::new(py, Self))
                 .unwrap()
@@ -167,7 +167,7 @@ mod _core {
             Err(PyOverflowError::new_err("infinite set"))
         }
 
-        fn __iter__(&self) -> PyResult<PyObject> {
+        fn __iter__(&self) -> PyResult<Py<PyAny>> {
             Err(PyOverflowError::new_err("infinite set"))
         }
 
@@ -226,7 +226,7 @@ mod _core {
             }
         }
 
-        fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+        fn __xor__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
             if !is_set(other)? {
                 return Err(PyTypeError::new_err("not a set"));
             }
@@ -248,7 +248,7 @@ mod _core {
             }
         }
 
-        fn __sub__(&self, other: &Bound<'_, PyAny>) -> PyResult<PyObject> {
+        fn __sub__(&self, other: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
             self.__xor__(other)
         }
 
