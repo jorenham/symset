@@ -38,12 +38,12 @@ Changelog = "https://github.com/jorenham/symset/releases"
 
 [dependency-groups]
 dev = [
-    "maturin>=1.8.6",
-    "maturin-import-hook>=0.2.0",
-    "basedpyright>=1.29.2",
-    "pytest>=8.4.0",
-    "hypothesis>=6.135.0",
-    "ruff>=0.11.12",
+    "maturin>=1.9.4",
+    "maturin-import-hook>=0.3.0",
+    "basedpyright>=1.31.3",
+    "pytest>=8.4.1",
+    "hypothesis>=6.138.14",
+    "ruff>=0.12.11",
 ]
 
 
