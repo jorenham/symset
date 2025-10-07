@@ -1,9 +1,9 @@
 [package]
 name = "symset"
-version = "0.0.0"
+version = "0.0.1"
 edition = "2024"
 rust-version = "1.89"
-repository = "https://github.com/jorenham/symset/"
+repository = "https://github.com/jorenham/symset"
 authors = ["Joren Hammudoglu <jhammudoglu@gmail.com>"]
 license = "BSD-3-Clause"
 readme = "README.md"
