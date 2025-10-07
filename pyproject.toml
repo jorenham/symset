@@ -5,7 +5,7 @@ build-backend = "maturin"
 
 [project]
 name = "symset"
-version = "0.0.0"
+version = "0.0.1.dev0"
 description = "Symbolic Sets for Python, written in Rust"
 readme = "README.md"
 authors = [{name = "Joren Hammudoglu", email = "jhammudoglu@gmail.com"}]
@@ -38,12 +38,12 @@ Changelog = "https://github.com/jorenham/symset/releases"
 
 [dependency-groups]
 dev = [
-    "maturin>=1.9.4",
+    "maturin>=1.9.6",
     "maturin-import-hook>=0.3.0",
-    "basedpyright>=1.31.3",
-    "pytest>=8.4.1",
-    "hypothesis>=6.138.14",
-    "ruff>=0.12.11",
+    "basedpyright>=1.31.6",
+    "pytest>=8.4.2",
+    "hypothesis>=6.140.3",
+    "ruff>=0.14.0",
 ]
 
 
@@ -77,7 +77,6 @@ reportImportCycles = true
 reportMissingSuperCall = true
 reportPrivateImportUsage = false
 reportPrivateUsage = false
-reportShadowedImports = true
 reportUninitializedInstanceVariable = true
 reportUnusedImport = false
 reportUnnecessaryTypeIgnoreComment = true
