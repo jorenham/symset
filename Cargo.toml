@@ -13,5 +13,5 @@ name = "_core"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.27.1"
+version = "0.27.2"
 features = ["extension-module", "abi3-py311"]
