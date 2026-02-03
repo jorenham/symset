@@ -96,7 +96,7 @@ skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["CPY", "FIX", "TD", "COM812"]
+ignore = ["CPY", "FIX", "TD", "COM812", "RUF067"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
